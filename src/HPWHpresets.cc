@@ -126,7 +126,9 @@ int HPWH::HPWHinit_resTank(double tankVol_L,
     calcDerivedValues();
 
     if (checkInputs() == HPWH_ABORT)
+    {
         return HPWH_ABORT;
+    }
 
     isHeating = false;
     for (int i = 0; i < numHeatSources; i++)
@@ -265,7 +267,9 @@ int HPWH::HPWHinit_resTankGeneric(double tankVol_L,
     calcDerivedValues();
 
     if (checkInputs() == HPWH_ABORT)
+    {
         return HPWH_ABORT;
+    }
 
     isHeating = false;
     for (int i = 0; i < numHeatSources; i++)

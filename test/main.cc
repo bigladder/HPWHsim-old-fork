@@ -152,7 +152,9 @@ int main(int argc, char* argv[])
     {
         inputFile = input2 + ".txt";
         if (hpwh.HPWHinit_file(inputFile) != 0)
+        {
             exit(1);
+        }
     }
     else
     {

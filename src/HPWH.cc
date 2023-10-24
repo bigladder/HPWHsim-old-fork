@@ -1356,9 +1356,13 @@ HPWH::getTankSurfaceArea(double vol, UNITS volUnits /*=UNITS_L*/, UNITS surfAUni
     if (value >= 0.)
     {
         if (surfAUnits == UNITS_M2)
+        {
             value = FT2_TO_M2(value);
+        }
         else if (surfAUnits != UNITS_FT2)
+        {
             value = -1.;
+        }
     }
     return value;
 }
@@ -1373,7 +1377,9 @@ double HPWH::getTankSurfaceArea(UNITS units /*=UNITS_FT2*/) const
     if (value < 0.)
     {
         if (hpwhVerbosity >= VRB_reluctant)
+        {
             msg("Incorrect unit specification for getTankSurfaceArea.  \n");
+        }
         value = HPWH_ABORT;
     }
     return value;
@@ -1394,9 +1400,13 @@ HPWH::getTankRadius(double vol, UNITS volUnits /*=UNITS_L*/, UNITS radiusUnits /
     {
         value = pow(volft3 / 3.14159 / ASPECTRATIO, 1. / 3.);
         if (radiusUnits == UNITS_M)
+        {
             value = FT_TO_M(value);
+        }
         else if (radiusUnits != UNITS_FT)
+        {
             value = -1.;
+        }
     }
     return value;
 }
@@ -1413,7 +1423,9 @@ double HPWH::getTankRadius(UNITS units /*=UNITS_FT*/) const
     if (value < 0.)
     {
         if (hpwhVerbosity >= VRB_reluctant)
+        {
             msg("Incorrect unit specification for getTankRadius.  \n");
+        }
         value = HPWH_ABORT;
     }
     return value;
@@ -3394,7 +3406,9 @@ void HPWH::updateTankTemps(double drawVolume_L,
 
     // Assign the new temporary tank temps to the real tank temps.
     for (int i = 0; i < numNodes; i++)
+    {
         tankTemps_C[i] = nextTankTemps_C[i];
+    }
 
     // check for inverted temperature profile
     mixTankInversions();
@@ -3446,7 +3460,9 @@ void HPWH::mixTankInversions()
 
                     // Assign the tank temps from i to k
                     for (int k = i; k >= m; k--)
+                    {
                         tankTemps_C[k] = Tmixed;
+                    }
                 }
             }
 
@@ -4210,8 +4226,12 @@ void HPWH::HeatSource::addHeat(double externalT_C, double minutesToRun)
             (1.0 - (leftoverCap_kJ / BTU_TO_KJ(cap_BTUperHr * minutesToRun / 60.0))) * minutesToRun;
 #if 1 // error check, 1-22-2017
         if (runtime_min < -0.001)
+        {
             if (hpwh->hpwhVerbosity >= VRB_reluctant)
+            {
                 hpwh->msg("Internal error: Negative runtime = %0.3f min\n", runtime_min);
+            }
+        }
 #endif
     }
     break;
@@ -4664,7 +4684,9 @@ void HPWH::HeatSource::calcHeatDist(std::vector<double>& heatDistribution)
                 temp *= (hpwh->setpoint_C - hpwh->tankTemps_C[i]);
 #if defined(SETPOINT_FIX)
                 if (temp < 0.)
+                {
                     temp = 0.;
+                }
 #endif
                 heatDistribution.push_back(temp);
             }
@@ -4740,7 +4762,9 @@ double HPWH::HeatSource::addHeatAboveNode(double cap_kJ, int node)
         else if (Q_kJ > 0.)
         { // temp will recover by/before end of timestep
             for (int j = node; j <= setPointNodeNum; j++)
+            {
                 hpwh->tankTemps_C[j] = targetTemp_C;
+            }
             cap_kJ -= Q_kJ;
         }
         setPointNodeNum++;
@@ -5128,7 +5152,9 @@ void HPWH::calcDerivedHeatingValues()
             {
                 condentropy -= setOfSources[i].condensity[j] * log(setOfSources[i].condensity[j]);
                 if (hpwhVerbosity >= VRB_emetic)
+                {
                     msg(outputString, "condentropy %.2lf \n", condentropy);
+                }
             }
         }
         setOfSources[i].shrinkage = alpha + condentropy * beta;
@@ -5343,7 +5369,9 @@ int HPWH::checkInputs()
         // check is condensity sums to 1
         condensitySum = 0;
         for (int j = 0; j < CONDENSITY_SIZE; j++)
+        {
             condensitySum += setOfSources[i].condensity[j];
+        }
         if (fabs(condensitySum - 1.0) > 1e-6)
         {
             if (hpwhVerbosity >= VRB_reluctant)
@@ -5587,7 +5615,9 @@ int HPWH::HPWHinit_file(string configFile)
         {
             line_ss >> tempDouble >> units;
             if (units == "gal")
+            {
                 tempDouble = GAL_TO_L(tempDouble);
+            }
             else if (units == "L")
                 ; // do nothing, lol
             else
@@ -5670,7 +5700,9 @@ int HPWH::HPWHinit_file(string configFile)
         {
             line_ss >> tempDouble >> units;
             if (units == "F")
+            {
                 tempDouble = F_TO_C(tempDouble);
+            }
             else if (units == "C")
                 ; // do nothing, lol
             else
@@ -5688,9 +5720,13 @@ int HPWH::HPWHinit_file(string configFile)
         {
             line_ss >> tempString;
             if (tempString == "true")
+            {
                 setpointFixed = true;
+            }
             else if (tempString == "false")
+            {
                 setpointFixed = false;
+            }
             else
             {
                 if (hpwhVerbosity >= VRB_reluctant)
@@ -5751,9 +5787,13 @@ int HPWH::HPWHinit_file(string configFile)
             {
                 line_ss >> tempString;
                 if (tempString == "true")
+                {
                     setOfSources[heatsource].isVIP = true;
+                }
                 else if (tempString == "false")
+                {
                     setOfSources[heatsource].isVIP = false;
+                }
                 else
                 {
                     if (hpwhVerbosity >= VRB_reluctant)
@@ -5769,9 +5809,13 @@ int HPWH::HPWHinit_file(string configFile)
             {
                 line_ss >> tempString;
                 if (tempString == "true")
+                {
                     setOfSources[heatsource].isOn = true;
+                }
                 else if (tempString == "false")
+                {
                     setOfSources[heatsource].isOn = false;
+                }
                 else
                 {
                     if (hpwhVerbosity >= VRB_reluctant)
@@ -5787,7 +5831,9 @@ int HPWH::HPWHinit_file(string configFile)
             {
                 line_ss >> tempDouble >> units;
                 if (units == "F")
+                {
                     tempDouble = F_TO_C(tempDouble);
+                }
                 else if (units == "C")
                     ; // do nothing, lol
                 else
@@ -5804,7 +5850,9 @@ int HPWH::HPWHinit_file(string configFile)
             {
                 line_ss >> tempDouble >> units;
                 if (units == "F")
+                {
                     tempDouble = F_TO_C(tempDouble);
+                }
                 else if (units == "C")
                     ; // do nothing, lol
                 else
@@ -5891,9 +5939,13 @@ int HPWH::HPWHinit_file(string configFile)
                     line_ss >> compareStr >> tempDouble >> units;
                     std::function<bool(double, double)> compare;
                     if (compareStr == "<")
+                    {
                         compare = std::less<double>();
+                    }
                     else if (compareStr == ">")
+                    {
                         compare = std::greater<double>();
+                    }
                     else
                     {
                         if (hpwhVerbosity >= VRB_reluctant)
@@ -5956,7 +6008,9 @@ int HPWH::HPWHinit_file(string configFile)
                 {
                     line_ss >> tempDouble >> units;
                     if (units == "F")
+                    {
                         tempDouble = dF_TO_dC(tempDouble);
+                    }
                     else if (units == "C")
                         ; // do nothing, lol
                     else
@@ -6022,7 +6076,9 @@ int HPWH::HPWHinit_file(string configFile)
                 {
                     line_ss >> tempDouble >> units;
                     if (units == "F")
+                    {
                         tempDouble = F_TO_C(tempDouble);
+                    }
                     else if (units == "C")
                         ; // do nothing, lol
                     else
@@ -6232,7 +6288,9 @@ int HPWH::HPWHinit_file(string configFile)
                     ;
                 //        else if (units == "C") ; //do nothing, lol
                 else if (units == "C")
+                {
                     tempDouble = C_TO_F(tempDouble);
+                }
                 else
                 {
                     if (hpwhVerbosity >= VRB_reluctant)
@@ -6310,7 +6368,9 @@ int HPWH::HPWHinit_file(string configFile)
             {
                 line_ss >> tempDouble >> units;
                 if (units == "F")
+                {
                     tempDouble = dF_TO_dC(tempDouble);
+                }
                 else if (units == "C")
                     ; // do nothing, lol
                 else

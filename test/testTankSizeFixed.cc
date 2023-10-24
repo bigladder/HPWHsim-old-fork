@@ -54,7 +54,9 @@ int testIsTankSizeFixed(HPWH::MODELS model)
 
     // set preset
     if (hpwh.HPWHinit_presets(model) != 0)
+    {
         return 1;
+    }
 
     double originalTankSize = hpwh.getTankSize();
     double newTankSize = originalTankSize + 100;
@@ -105,7 +107,9 @@ int testForceChangeTankSize(HPWH::MODELS model)
 
     // set preset
     if (hpwh.HPWHinit_presets(model) != 0)
+    {
         return 1;
+    }
 
     double newTankSize = 133.312; // No way a tank has this size originally
 
