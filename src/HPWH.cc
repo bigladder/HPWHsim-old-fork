@@ -1779,35 +1779,13 @@ double HPWH::getNthSimTcouple(int iTCouple,int nTCouple,UNITS units  /*=UNITS_C*
 			msg("You have attempted to access a simulated thermocouple that does not exist.  \n");
 		}
 		return double(HPWH_ABORT);
-	} else if(nTCouple > getNumNodes()) {
-		if(hpwhVerbosity >= VRB_reluctant) {
-			msg("You have more simulated thermocouples than nodes.  \n");
-		}
+	} else if(nTCouple < 1) {
 		return double(HPWH_ABORT);
 	} else {
-		double weight = getNumNodes() / static_cast<double>(nTCouple);
-		double start_ind = (iTCouple - 1.) * weight;
-		int ind = (int)std::ceil(start_ind);
 
-		double averageTemp_C = 0.0;
-
-		// Check any intial fraction of nodes 
-		averageTemp_C += getTankNodeTemp((int)std::floor(start_ind),UNITS_C) * ((double)ind - start_ind);
-		weight -= ((double)ind - start_ind);
-
-		// Check the full nodes
-		while(weight >= 1.0) {
-			averageTemp_C += getTankNodeTemp(ind,UNITS_C);
-			weight -= 1.0;
-			ind += 1;
-		}
-
-		// Check any leftover
-		if(weight > 0.) {
-			averageTemp_C += getTankNodeTemp(ind,UNITS_C) * weight;
-		}
-		// Divide by the original weight to get the true average
-		averageTemp_C /= ((double)getNumNodes() / (double)nTCouple);
+		double fracBegin = static_cast<double>(iTCouple - 1.) / nTCouple;
+		double fracEnd = static_cast<double>(iTCouple) / nTCouple;
+		double averageTemp_C = getResampledValue(tankTemps_C, fracBegin, fracEnd);
 
 		if(units == UNITS_C) {
 			return averageTemp_C;
@@ -2581,18 +2559,14 @@ void HPWH::updateTankTemps(double drawVolume_L,double inletT_C,double tankAmbien
 		const double bc = 2.0 * tau *  tankUA_kJperHrC * fracAreaTop * nodeHeight_m / KWATER_WpermC;
 
 		// Small truncation differences here lead to larger differences later 
-		double T0 = tankTemps_C[0];
-		double Tn0 = tankTemps_C[getNumNodes() - 1];
-
-		// Boundary nodes for finite difference; outer edge of top and bottom nodes first
-		double nextT0 = (1. - bc) * T0 + bc * tankAmbientT_C;
-		double nextTn0 = (1. - bc) * Tn0 + bc * tankAmbientT_C;
+		// Boundary nodes for finite difference
 		if (getNumNodes() > 1) { // inner edges of top and bottom nodes
-			nextT0 += 2. * tau * (tankTemps_C[1] - T0);
-			nextTn0 += 2. * tau * (tankTemps_C[getNumNodes() - 2] - Tn0);
+			nextTankTemps_C[0] = (1.0 - 2.0 * tau - bc) * tankTemps_C[0] + 2.0 * tau * tankTemps_C[1] + bc * tankAmbientT_C;
+			nextTankTemps_C[getNumNodes() - 1] = (1.0 - 2.0 * tau - bc) * tankTemps_C[getNumNodes() - 1] + 2.0 * tau * tankTemps_C[getNumNodes() - 2] + bc * tankAmbientT_C;
 		}
-		nextTankTemps_C[0] = nextT0;
-		nextTankTemps_C[getNumNodes() - 1] = nextTn0;
+		else { // Factor of 2. for single-node
+			nextTankTemps_C[0] = (1.0 - 2. * bc) * tankTemps_C[0] + 2. * bc * tankAmbientT_C;
+		}
 
 		// Internal nodes for the finite difference
 		for(int i = 1; i < getNumNodes() - 1; i++) {
